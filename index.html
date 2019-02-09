@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="p5/p5.min.js"></script>
+    <script src="p5/addons/p5.dom.min.js"></script>
+    <script type="text/javascript">
+
+    </script>
+    <title>Dice Roller Simple</title>
+    <style>
+    body {
+      margin: 0px;
+    }
+
+    .rollSpan {
+      color: rgb(142, 130, 98);
+      font-size: 70px;
+    }
+    .resultSpan {
+      font-size: 200px;
+    }
+
+    button {
+      font-size: 50px;
+    }
+  </style>
+  </head>
+  <body>
+    <script type="text/javascript">
+      window.resultTotal = null;
+      var rollSpan1 = null;
+      var rollSpan2 = null;
+      var rollingNumber1;
+      var rollingNumber2;
+
+      var results = [0,0,0,0,0,0,0,0,0,0,0];
+      var displayResults = [0,0,0,0,0,0,0,0,0,0,0];
+
+      var LASTMILLIS = null;
+      var DELTATIME = null;
+
+      function setup() {
+
+        createCanvas(350,550);
+
+
+        window.button = createButton("ROLL");
+        button.position(19, 19);
+        button.size(300,200);
+        button.mouseReleased(button1Released);
+
+
+        rollingNumber1 = new RollingNumber(updateResults);
+        rollSpan1 = createSpan();
+        rollSpan1.addClass("rollSpan");
+        rollSpan1.position(50,220)
+
+        rollingNumber2 = new RollingNumber();
+        rollSpan2 = createSpan();
+        rollSpan2.addClass("rollSpan");
+        rollSpan2.position(250,220)
+
+        resultTotal = createSpan();
+        resultTotal.addClass("resultSpan");
+
+        // var r = [0,0,0,0,0,0];
+        // for(let i = 0; i < 100000; i++) {
+        //   let n = getRandomD6() - 1 ;
+        //   r[n] = r[n] + 1;
+        // }
+        // console.log(r);
+
+      }
+
+      function draw() {
+        if(!LASTMILLIS) {LASTMILLIS = millis(); DELTATIME = 1;} else {DELTATIME = millis() - LASTMILLIS;}
+
+        background(255, 242, 198);
+
+        let r1 = rollingNumber1.getNumber()
+        let r2 = rollingNumber2.getNumber()
+
+        rollSpan1.html(r1);
+        rollSpan2.html(r2);
+        resultTotal.html(r1 + r2);
+        if(resultTotal.html().length == 2) {
+          resultTotal.position(70,250)
+        } else {
+          resultTotal.position(120,250)
+        }
+
+        textSize(20);
+        for(let i = 0; i < 5; i++) {
+          text((i+2) + ": " + displayResults[i], 10+i*55, 500)
+        }
+        for(let i = 5; i < displayResults.length; i++) {
+          text((i+2) + ": " + displayResults[i], 10+(i-5)*55, 530)
+        }
+
+
+        rollingNumber1.update();
+        rollingNumber2.update();
+        
+        LASTMILLIS = millis();
+      }
+
+      function getRandomTwoD6() {
+        return [getRandomD6(), getRandomD6()];
+      }
+      function getRandomD6() {
+        return floor(random(1,7));
+      }
+
+      var __firstEventDetected = null;
+      function button1Released(event) {
+      	console.log(event);
+      	//phones fire touchend and mouseup events. so we need to only detect one
+      	if(event) {
+      		if (!__firstEventDetected) {
+      			__firstEventDetected = event.type;
+      		}
+      		if(__firstEventDetected != event.type) {
+      			return false;
+      		}
+      	}
+
+        let n1 = getRandomD6();
+        let n2 = getRandomD6();
+
+        results[(n1+n2)-2] = results[(n1+n2)-2] + 1;
+
+        rollingNumber1.rollA(n1);
+        rollingNumber2.rollA(n2);
+      }
+
+      function updateResults(n) {
+        for(let i = 0; i < results.length; i++) {
+          displayResults[i] = results[i];
+        }
+      }
+
+      function RollingNumber(callback) {
+        var that = this;
+        this.finalNumber = null;
+        this.currentDisplayNumber = "";
+        this.duration = 500;
+        this.elapsed = 0;
+
+        var state = "NOTACTIVE";//"DONE","ROLLING"
+
+        this.reset = function() {
+          state = "NOTACTIVE";
+        }
+
+        this.rollA = function(n) {
+          state = "ROLLING";
+          this.elapsed = 0;
+          this.finalNumber = n;
+        };
+
+        this.isDone = function() {
+          return this.elapsed >= this.duration;
+        };
+
+        this.update = function() {
+          if(state == "NOTACTIVE") {
+            this.currentDisplayNumber = "";
+          } else if(state == "ROLLING") {
+            this.elapsed += DELTATIME;
+            this.currentDisplayNumber = getRandomD6();
+            if(this.isDone()) {
+              state = "DONE";
+              if(callback) { callback(this.finalNumber); }
+            }
+          } else {
+            this.currentDisplayNumber = this.finalNumber;
+          }
+        };
+
+        this.getNumber = function() {
+            return this.currentDisplayNumber;
+        };
+
+      }
+
+    </script>
+  </body>
+</html>
