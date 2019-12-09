@@ -8,18 +8,59 @@
     <script type="text/javascript">
 
     </script>
-    <title>Dice Roller Simple</title>
+    <title>Catan Dice Roller</title>
     <style>
     body {
       margin: 0px;
     }
 
+    button {
+      background-color: #bf9471;
+    }
+
     .rollSpan {
       color: rgb(142, 130, 98);
+      border-radius: 50%;
       font-size: 70px;
     }
+    .rollSpan1 {
+      color: yellow;
+      background-color: red;
+      border-radius: 10%;
+      border: solid 1px black;
+      width:80px;
+      height:80px;
+      font-size: 70px;
+    }
+    .rollSpan2 {
+      color: red;
+      background-color: yellow;
+      border-radius: 10%;
+      border: solid 1px black;
+      width:80px;
+      height:80px;
+      font-size: 70px;
+    }
+
     .resultSpan {
-      font-size: 200px;
+      font-size: 160px;
+      border-radius: 50%;
+      /*background-color: yellow;*/
+    }
+
+    .resultBackgroundSpan {
+      /*border: solid 1px black;*/
+      background: radial-gradient(circle at 70% 25%, #fff6bf 90%, #dec06f);
+      /*background: radial-gradient(circle at 80% 15%, #555, #888);*/
+      border-radius: 50%;
+    }
+
+    .resultBackgroundSpanBG {
+      background: radial-gradient(circle at 70% 25%, #fff6bf 10%, #dec06f);
+      /*background: radial-gradient(circle at 70% 25%, #999 50%, #222 );*/
+      border: solid 1px black;
+      border-radius: 50%;
+      /*padding: 10px;*/
     }
 
     button {
@@ -29,7 +70,9 @@
   </head>
   <body>
     <script type="text/javascript">
-      window.resultTotal = null;
+      window.resultSpan = null;
+      window.resultBackgroundSpan = null;
+      window.resultBackgroundSpanBG = null;
       var rollSpan1 = null;
       var rollSpan2 = null;
       var rollingNumber1;
@@ -45,52 +88,66 @@
 
         createCanvas(350,550);
 
-
         window.button = createButton("ROLL");
         button.position(19, 19);
-        button.size(300,200);
+        button.size(312,200);
         button.mouseReleased(button1Released);
 
 
         rollingNumber1 = new RollingNumber(updateResults);
         rollSpan1 = createSpan();
-        rollSpan1.addClass("rollSpan");
-        rollSpan1.position(50,220)
+        rollSpan1.addClass("rollSpan1");
+        rollSpan1.position(40,160);
 
         rollingNumber2 = new RollingNumber();
         rollSpan2 = createSpan();
-        rollSpan2.addClass("rollSpan");
-        rollSpan2.position(250,220)
+        rollSpan2.addClass("rollSpan2");
+        rollSpan2.position(230,160);
 
-        resultTotal = createSpan();
-        resultTotal.addClass("resultSpan");
 
-        // var r = [0,0,0,0,0,0];
-        // for(let i = 0; i < 100000; i++) {
-        //   let n = getRandomD6() - 1 ;
-        //   r[n] = r[n] + 1;
-        // }
-        // console.log(r);
+        let x_offset = 14; //I use these two values to move the two BG spans together.
+        let y_offset = 0;
+
+        resultBackgroundSpanBG = createSpan();
+        resultBackgroundSpanBG.addClass("resultBackgroundSpanBG");
+        resultBackgroundSpanBG.size(245,245);
+        resultBackgroundSpanBG.position(37+x_offset,227+y_offset);
+
+        resultBackgroundSpan = createSpan();
+        resultBackgroundSpan.addClass("resultBackgroundSpan");
+        resultBackgroundSpan.size(220,220);
+        resultBackgroundSpan.position(50+x_offset,240+y_offset);
+
+
+
+        resultSpan = createSpan();
+        resultSpan.addClass("resultSpan");
 
       }
 
       function draw() {
         if(!LASTMILLIS) {LASTMILLIS = millis(); DELTATIME = 1;} else {DELTATIME = millis() - LASTMILLIS;}
 
-        background(255, 242, 198);
+        background(128, 68, 33);
 
         let r1 = rollingNumber1.getNumber()
         let r2 = rollingNumber2.getNumber()
 
-        rollSpan1.html(r1);
-        rollSpan2.html(r2);
-        resultTotal.html(r1 + r2);
-        if(resultTotal.html().length == 2) {
-          resultTotal.position(70,250)
+        rollSpan1.html("&nbsp;"+r1);
+        rollSpan2.html("&nbsp;"+r2);
+        resultSpan.html(r1 + r2);
+        if(r1 + r2 == 8 || r1 + r2 == 6) {
+          resultSpan.style("color","red");
         } else {
-          resultTotal.position(120,250)
+          resultSpan.style("color","black");
+        }
+        if(resultSpan.html().length == 2) {
+          resultSpan.position(78,233)
+        } else {
+          resultSpan.position(128,233)
         }
 
+        //Drawing result tallies
         textSize(20);
         for(let i = 0; i < 5; i++) {
           text((i+2) + ": " + displayResults[i], 10+i*55, 500)
@@ -98,7 +155,6 @@
         for(let i = 5; i < displayResults.length; i++) {
           text((i+2) + ": " + displayResults[i], 10+(i-5)*55, 530)
         }
-
 
         rollingNumber1.update();
         rollingNumber2.update();
@@ -115,16 +171,16 @@
 
       var __firstEventDetected = null;
       function button1Released(event) {
-      	console.log(event);
-      	//phones fire touchend and mouseup events. so we need to only detect one
-      	if(event) {
-      		if (!__firstEventDetected) {
-      			__firstEventDetected = event.type;
-      		}
-      		if(__firstEventDetected != event.type) {
-      			return false;
-      		}
-      	}
+        console.log(event);
+        //phones fire touchend and mouseup events. so we need to only detect one
+        if(event) {
+          if (!__firstEventDetected) {
+            __firstEventDetected = event.type;
+          }
+          if(__firstEventDetected != event.type) {
+            return false;
+          }
+        }
 
         let n1 = getRandomD6();
         let n2 = getRandomD6();
@@ -135,7 +191,7 @@
         rollingNumber2.rollA(n2);
       }
 
-      function updateResults(n) {
+      function updateResults() {
         for(let i = 0; i < results.length; i++) {
           displayResults[i] = results[i];
         }
