@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="p5/p5.min.js"></script>
     <script src="p5/addons/p5.dom.min.js"></script>
+    <script src="seedrandom.min.js"></script>
     <script type="text/javascript">
 
     </script>
@@ -15,7 +16,9 @@
     }
 
     button {
-      background-color: #bf9471;
+      /*background-color: #bf9471;*/
+      background-color: white;
+      opacity: 0.6;
     }
 
     .rollSpan {
@@ -70,6 +73,7 @@
   </head>
   <body>
     <script type="text/javascript">
+
       window.resultSpan = null;
       window.resultBackgroundSpan = null;
       window.resultBackgroundSpanBG = null;
@@ -128,7 +132,8 @@
       function draw() {
         if(!LASTMILLIS) {LASTMILLIS = millis(); DELTATIME = 1;} else {DELTATIME = millis() - LASTMILLIS;}
 
-        background(128, 68, 33);
+        background(255);
+        drawOcean();
 
         let r1 = rollingNumber1.getNumber()
         let r2 = rollingNumber2.getNumber()
@@ -148,6 +153,7 @@
         }
 
         //Drawing result tallies
+        fill(0);
         textSize(20);
         for(let i = 0; i < 5; i++) {
           text((i+2) + ": " + displayResults[i], 10+i*55, 500)
@@ -195,6 +201,30 @@
         for(let i = 0; i < results.length; i++) {
           displayResults[i] = results[i];
         }
+      }
+
+      function drawOcean() {
+          let myrng = new Math.seedrandom('hello1.');
+          let c1 = color(0, 164, 228, 50);
+          let c2 = color(0, 150, 215, 50);
+          let c3 = color(99, 211, 254, 50);
+
+          function randomColor() {
+            if(floor(myrng()*3) >= 2) {
+              fill(c1);
+            } else if(floor(myrng()*3) >= 1) {
+              fill(c2);
+            } else {
+              fill(c3);
+            }
+          }
+
+          for(let i = 0; i < 50; i++) {
+            noStroke();
+            randomColor();
+            rect(0, myrng()*height, width, 50);
+          }
+
       }
 
       function RollingNumber(callback) {
