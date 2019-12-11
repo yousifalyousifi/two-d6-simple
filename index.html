@@ -82,8 +82,8 @@
       var rollingNumber1;
       var rollingNumber2;
 
-      var results = [0,0,0,0,0,0,0,0,0,0,0];
-      var displayResults = [0,0,0,0,0,0,0,0,0,0,0];
+      var results = [0,0,0,0,0,0,0,0,0,0,0,0]; //first 11 are dice results, 12th is total rolls
+      var displayResults = [0,0,0,0,0,0,0,0,0,0,0,0];
 
       var LASTMILLIS = null;
       var DELTATIME = null;
@@ -92,7 +92,19 @@
 
         createCanvas(350,550);
 
+        //This disables all localStorage features I am using currently.
+        //Not sure if I want to remember dice results yet.
+        window.localStorage.setItem("catan.roll.results", null)
+
+        let pastResultsString = window.localStorage.getItem("catan.roll.results")
+        if(pastResultsString != "null") {
+          let pastResults = JSON.parse("[" + pastResultsString + "]");
+          results = [...pastResults];
+          displayResults = [...pastResults];
+        }
+
         window.button = createButton("ROLL");
+        button.id("rollButton");
         button.position(19, 19);
         button.size(312,200);
         button.mouseReleased(button1Released);
@@ -158,7 +170,8 @@
         for(let i = 0; i < 5; i++) {
           text((i+2) + ": " + displayResults[i], 10+i*55, 500)
         }
-        for(let i = 5; i < displayResults.length; i++) {
+        text("N: " + displayResults[11], 280, 500)
+        for(let i = 5; i < 11; i++) {
           text((i+2) + ": " + displayResults[i], 10+(i-5)*55, 530)
         }
 
@@ -188,10 +201,15 @@
           }
         }
 
+        document.getElementById("rollButton").disabled = true;
+
         let n1 = getRandomD6();
         let n2 = getRandomD6();
 
         results[(n1+n2)-2] = results[(n1+n2)-2] + 1;
+        results[11] = results[11] + 1; //update total number of throws
+
+        window.localStorage.setItem("catan.roll.results",results);
 
         rollingNumber1.rollA(n1);
         rollingNumber2.rollA(n2);
@@ -201,6 +219,8 @@
         for(let i = 0; i < results.length; i++) {
           displayResults[i] = results[i];
         }
+        document.getElementById("rollButton").disabled = false;
+
       }
 
       function drawOcean() {
