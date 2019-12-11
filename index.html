@@ -7,7 +7,6 @@
     <script src="p5/addons/p5.dom.min.js"></script>
     <script src="seedrandom.min.js"></script>
     <script type="text/javascript">
-
     </script>
     <title>Catan Dice Roller</title>
     <style>
@@ -201,7 +200,13 @@
           }
         }
 
-        document.getElementById("rollButton").disabled = true;
+        //This conditional is needed because Chrome on android
+        // for some reason doesn't understand the 'disabled' attribute properly
+        if(button.attribute("disabled")==='') {
+          return false;
+        }
+
+        button.attribute('disabled', '');
 
         let n1 = getRandomD6();
         let n2 = getRandomD6();
@@ -219,8 +224,7 @@
         for(let i = 0; i < results.length; i++) {
           displayResults[i] = results[i];
         }
-        document.getElementById("rollButton").disabled = false;
-
+        button.removeAttribute('disabled');
       }
 
       function drawOcean() {
