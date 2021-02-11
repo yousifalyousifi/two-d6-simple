@@ -14,11 +14,6 @@
       margin: 0px;
     }
 
-    button {
-      /*background-color: #bf9471;*/
-      background-color: white;
-      opacity: 0.6;
-    }
 
     .rollSpan {
       color: rgb(142, 130, 98);
@@ -65,9 +60,13 @@
       /*padding: 10px;*/
     }
 
-    button {
+    #rollButton {
+      /*background-color: #bf9471;*/
       font-size: 50px;
+      background-color: white;
+      opacity: 0.6;
     }
+
   </style>
   </head>
   <body>
@@ -87,6 +86,8 @@
       var LASTMILLIS = null;
       var DELTATIME = null;
 
+      var rollButton;
+
       function setup() {
 
         createCanvas(350,550);
@@ -102,11 +103,11 @@
           displayResults = [...pastResults];
         }
 
-        window.button = createButton("ROLL");
-        button.id("rollButton");
-        button.position(19, 19);
-        button.size(312,200);
-        button.mouseReleased(button1Released);
+        rollButton = createButton("ROLL");
+        rollButton.id("rollButton");
+        rollButton.position(19, 19);
+        rollButton.size(312,200);
+        rollButton.mouseReleased(button1Released);
 
 
         rollingNumber1 = new RollingNumber(updateResults);
@@ -202,11 +203,11 @@
 
         //This conditional is needed because Chrome on android
         // for some reason doesn't understand the 'disabled' attribute properly
-        if(button.attribute("disabled")==='') {
+        if(rollButton.attribute("disabled")==='') {
           return false;
         }
 
-        button.attribute('disabled', '');
+        rollButton.attribute('disabled', '');
 
         let n1 = getRandomD6();
         let n2 = getRandomD6();
@@ -224,7 +225,7 @@
         for(let i = 0; i < results.length; i++) {
           displayResults[i] = results[i];
         }
-        button.removeAttribute('disabled');
+        rollButton.removeAttribute('disabled');
       }
 
       function drawOcean() {
