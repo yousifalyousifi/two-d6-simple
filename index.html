@@ -112,13 +112,20 @@
 
         //This disables all localStorage features I am using currently.
         //Not sure if I want to remember dice results yet.
-        window.localStorage.setItem("catan.roll.results", null)
+        //Uncomment lines below to disable result storage
+        // window.localStorage.setItem("catan.roll.results", null)
+        // window.localStorage.setItem("catan.roll.history", null)
 
         let pastResultsString = window.localStorage.getItem("catan.roll.results")
         if(pastResultsString != "null") {
           let pastResults = JSON.parse("[" + pastResultsString + "]");
           results = [...pastResults];
           displayResults = [...pastResults];
+        }
+        let pastHistoryString = window.localStorage.getItem("catan.roll.history")
+        if(pastHistoryString != "null") {
+          let pastResults = JSON.parse("[" + pastHistoryString + "]");
+          historyLog = [...pastResults];
         }
 
         rollButton = createButton("ROLL");
@@ -315,6 +322,7 @@
 
         historyLog.unshift(historyLatestResult);//insert the result at the beginning of the log
         historyLog.splice(historySize,1); //remove the size-th element, to keep the log at a fixed size
+        window.localStorage.setItem("catan.roll.history",historyLog);
       }
 
       function resetResults() {
@@ -322,6 +330,10 @@
           displayResults = [0,0,0,0,0,0,0,0,0,0,0,0];
           historyLog = [0,0,0,0,0,0];
           historyLatestResult = 0;
+
+        window.localStorage.setItem("catan.roll.results",null);
+        window.localStorage.setItem("catan.roll.history",null);
+
       }
 
       function drawOcean() {
