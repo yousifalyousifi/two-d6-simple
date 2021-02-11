@@ -67,6 +67,13 @@
       opacity: 0.6;
     }
 
+    #statsButton {
+      /*background-color: #bf9471;*/
+      font-size: 20px;
+      background-color: white;
+      opacity: 0.6;
+    }
+
   </style>
   </head>
   <body>
@@ -87,6 +94,17 @@
       var DELTATIME = null;
 
       var rollButton;
+      var statsButton;
+      var statsState = 0; //0 = showing stats, 1 = showing history
+
+      var historyLog = [0,0,0,0,0,0];
+      var historyLatestResult = 0;
+      var historySize = 6;
+
+      var RESETDURATION = 3000;
+      var resetStartTime = 0;
+      var resetInterval = null;
+      var resetJustHappened = false;
 
       function setup() {
 
@@ -108,6 +126,13 @@
         rollButton.position(19, 19);
         rollButton.size(312,200);
         rollButton.mouseReleased(button1Released);
+
+        statsButton = createButton("📊");
+        statsButton.id("statsButton");
+        statsButton.position(20, 420);
+        statsButton.size(40,40);
+        statsButton.mousePressed(button2Pressed);
+        statsButton.mouseReleased(button2Released);
 
 
         rollingNumber1 = new RollingNumber(updateResults);
@@ -133,7 +158,6 @@
         resultBackgroundSpan.addClass("resultBackgroundSpan");
         resultBackgroundSpan.size(220,220);
         resultBackgroundSpan.position(50+x_offset,240+y_offset);
-
 
 
         resultSpan = createSpan();
@@ -165,14 +189,24 @@
         }
 
         //Drawing result tallies
-        fill(0);
-        textSize(20);
-        for(let i = 0; i < 5; i++) {
-          text((i+2) + ": " + displayResults[i], 10+i*55, 500)
+        if(statsState == 0)  {
+          fill(0);
+          textSize(20);
+          for(let i = 0; i < 5; i++) {
+            text((i+2) + ": " + displayResults[i], 10+i*55, 500)
+          }
+          text("N: " + displayResults[11], 280, 500)
+          for(let i = 5; i < 11; i++) {
+            text((i+2) + ": " + displayResults[i], 10+(i-5)*55, 530)
+          }
         }
-        text("N: " + displayResults[11], 280, 500)
-        for(let i = 5; i < 11; i++) {
-          text((i+2) + ": " + displayResults[i], 10+(i-5)*55, 530)
+        if(statsState == 1)  {
+          fill(0);
+          for(let i = 0; i < historySize; i++) {
+            textSize(20);
+            if(i==0) textSize(30);
+            text(historyLog[i], 30+i*50, 530)
+          }
         }
 
         rollingNumber1.update();
@@ -188,15 +222,16 @@
         return floor(random(1,7));
       }
 
-      var __firstEventDetected = null;
+      var __firstReleaseEventDetected = null;
+      var __firstPressEventDetected = null;
       function button1Released(event) {
         console.log(event);
         //phones fire touchend and mouseup events. so we need to only detect one
         if(event) {
-          if (!__firstEventDetected) {
-            __firstEventDetected = event.type;
+          if (!__firstReleaseEventDetected) {
+            __firstReleaseEventDetected = event.type;
           }
-          if(__firstEventDetected != event.type) {
+          if(__firstReleaseEventDetected != event.type) {
             return false;
           }
         }
@@ -217,8 +252,59 @@
 
         window.localStorage.setItem("catan.roll.results",results);
 
+        historyLatestResult = n1 + n2;
+
         rollingNumber1.rollA(n1);
         rollingNumber2.rollA(n2);
+      }
+
+      function button2Released(event) {
+        console.log(event);
+        //phones fire touchend and mouseup events. so we need to only detect one
+        if(event) {
+          if (!__firstReleaseEventDetected) {
+            __firstReleaseEventDetected = event.type;
+          }
+          if(__firstReleaseEventDetected != event.type) {
+            return false;
+          }
+        }
+
+        if(resetInterval) {
+              clearInterval(resetInterval);
+              resetInterval = null;
+        }
+        if(resetJustHappened) {
+          resetJustHappened = false;
+        } else {
+          statsState = statsState == 0 ? 1 : 0;
+        }        
+        
+
+      }
+
+      function button2Pressed(event) {
+        console.log(event);
+        //phones fire touchend and mouseup events. so we need to only detect one
+        if(event) {
+          if (!__firstPressEventDetected) {
+            __firstPressEventDetected = event.type;
+          }
+          if(__firstPressEventDetected != event.type) {
+            return false;
+          }
+        }
+
+        resetStartTime = millis();
+
+        resetInterval = setInterval(function() {
+            if(millis() - resetStartTime >= RESETDURATION) {
+              resetResults();
+              clearInterval(resetInterval);
+              resetJustHappened = true;
+            }
+        }, 100);
+
       }
 
       function updateResults() {
@@ -226,6 +312,16 @@
           displayResults[i] = results[i];
         }
         rollButton.removeAttribute('disabled');
+
+        historyLog.unshift(historyLatestResult);//insert the result at the beginning of the log
+        historyLog.splice(historySize,1); //remove the size-th element, to keep the log at a fixed size
+      }
+
+      function resetResults() {
+          results = [0,0,0,0,0,0,0,0,0,0,0,0]; //first 11 are dice results, 12th is total rolls
+          displayResults = [0,0,0,0,0,0,0,0,0,0,0,0];
+          historyLog = [0,0,0,0,0,0];
+          historyLatestResult = 0;
       }
 
       function drawOcean() {
