@@ -117,15 +117,20 @@
         // window.localStorage.setItem("catan.roll.history", null)
 
         let pastResultsString = window.localStorage.getItem("catan.roll.results")
-        if(pastResultsString != "null") {
+        console.log(pastResultsString)
+        if(pastResultsString != null) {
           let pastResults = JSON.parse("[" + pastResultsString + "]");
           results = [...pastResults];
           displayResults = [...pastResults];
+        } else {
+          window.localStorage.setItem("catan.roll.results",results);
         }
         let pastHistoryString = window.localStorage.getItem("catan.roll.history")
-        if(pastHistoryString != "null") {
+        if(pastHistoryString != null) {
           let pastResults = JSON.parse("[" + pastHistoryString + "]");
           historyLog = [...pastResults];
+        } else {
+          window.localStorage.setItem("catan.roll.history",historyLog);
         }
 
         rollButton = createButton("ROLL");
@@ -323,6 +328,7 @@
         historyLog.unshift(historyLatestResult);//insert the result at the beginning of the log
         historyLog.splice(historySize,1); //remove the size-th element, to keep the log at a fixed size
         window.localStorage.setItem("catan.roll.history",historyLog);
+
       }
 
       function resetResults() {
